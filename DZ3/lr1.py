@@ -56,12 +56,14 @@ open_cases=list()
 
 for i in range(int(m*n/5)):
     true_l[int((m)*random.random())][int((n)*random.random())]=5;
-    true_l[int((m)*random.random())][int((n)*random.random())]=4;
     true_l[int((m)*random.random())][int((n)*random.random())]=3;
     true_l[int((m)*random.random())][int((n)*random.random())]=2;
 
 
-'''Добавляем выход и вход'''
+'''Добавляем выход,  вход и ключ (для гарантии проходимости игры)'''
+
+for i in range(max(3, m*n//25)):
+    true_l[int((m)*random.random())][int((n)*random.random())]=4;
 true_l[-1][-1]=6
 true_l[0][0]=0
 
@@ -77,12 +79,14 @@ for i in range(m):
 размеры рюкзака'''
 x=0
 y=0
-staff=list()
 hp=100
 kp=10
 size=15
 f=1
 staff=list()
+
+
+
 '''Запускаем игру'''
 neportal=True
 while True:
@@ -100,6 +104,10 @@ while True:
                 производим требуемые манипуляции с инвентарем'''
                 for i in range(len(staff)):
                     print(i+1, ".", staff[i].name)
+                if len(staff)==0:
+                    print("В инвентаре пока пусто...")
+                    exit=input("Нажмите любую клавишу для выхода")
+                    break
                 print("")
                 print("1 - Выбросить ненужное")
                 print("2 - узнать характеристики")
@@ -181,6 +189,7 @@ while True:
                     print("3 - по степени защиты")
                     print("4 - по пользе для здоровья")
                     print("5 - по знаниям")
+                    print("6 - обратный порядок")
                     
                     el=int(input("По чему хотели бы сортировать?"))
                     if el==1:
@@ -193,6 +202,8 @@ while True:
                         staff.sort(key=lambda x: -x.health)
                     elif el==5:
                         staff.sort(key=lambda x: -x.knowledge)
+                    elif el==6:
+                        staff.reverse()
                     
                 elif d==2:
                     el=int(input("Номер элемента: "))-1
@@ -255,21 +266,26 @@ while True:
     
  
 
-    '''Если комната с ключом, сообщаем об этом игроку'''
     if true_l[x][y]==1:
         print("Тут пусто...")
         continue
+
+
     elif true_l[x][y]==4:
         print("Неужели, Вы нашли Ключ!")
         d=input("Нажмите 1 - чтобы забрать")
         if d=='1':
-            if len(staff)<size:
+            true_l[x][y]=1
+            if len(staff)<size and not key in staff:
                 staff.append(key)
-            else:
-                print("У вас уже есть ключ!")
+            elif len(staff)>=size:
+                print("В рюкзаке не хватает места!")
+            elif key in staff:
+                print("У Вас уже есть ключ!")
         continue
-    '''Команата с выходом. Конец игры'''       
+          
     elif true_l[x][y]==6:
+        '''Команата с выходом. Конец игры''' 
         print("Здесь выход! Воспользуйтесь ключом, чтобы завершить игру")
         print("1-воспользоваться")
         d=input()
@@ -291,55 +307,79 @@ while True:
         print("О нет! В этой комнате монстр!!!")
         monstr=int((100)*random.random())
         print("Выберите, чем будете защищаться!")
-        d=input("1 - выбрать оружие и защиту, любая другая клавиша - получить по голове")
+        d=input("1 - выбрать оружие и защиту, любая другая клавиша - сразиться с монстром в кулачном бою")
+
+
+        t1=-1
+        t2=-1
+        '''Выбираем предметы из инвентаря для усиления'''
         if d=="1":
             print("Предмет   Урон   Защита")
             for i in staff:
-                print(i.name(), i.harm(), i.protection())
+                print(i.name, i.harm, i.protection)
             t1=int(input("Введите номер предмета "))-1
-            d=input("1- для выбора еще одного предмета")
-            if d=='1':
-                t2=int(input("Введите номер предмета "))-1
-                if t1==t2:
-                    print("Этот предмет уже был выбран!")
-            if monstr<=staff[t1].harm()+staff[t2].harm():
-                print("Вы победили монстра!")
-                true_l[x][y]=1
-                continue
+            if t1>len(staff)-1:
+                t1=-1
+                print("Некорректный номер предмета! Придется отбиваться от монстра без защиты!")
             else:
-                uron=(monstr-staff[t1].harm()-staff[t2].harm())*2-staff[t1].protection()-staff[t2].protection()
-        else:
+                d=input("1 - для выбора еще одного предмета")
+                if d=='1':
+                    t2=int(input("Введите номер предмета "))-1
+                    if t2>len(staff)-1:
+                        t2=-1
+                        print("Некорректный номер! Придется отбиваться от монстра только одним предметом!")
+                    elif t1==t2:
+                        print("Этот предмет уже был выбран!")
+            
+
+        '''Расчет урона от монстра и силу атаки на него'''
+        if t1==-1 and t2==-1:
             uron=monstr
-        if uron <=0:
+            attack=0
+        elif t1>-1 and t2==-1:
+            attack=staff[t1].harm
+            uron=monstr-staff[t1].protection
+        else:
+            attack=staff[t1].harm + staff[t2].harm
+            uron=monstr-staff[t1].protection-staff[t2].protection
+
+        if uron<=0:
+            print("Вы победили монстра!")
+            true_l[x][y]=1
+            continue
+           
+        elif uron <= attack:
             print("Вы смогли защититься от монстра. Он испугался и больше вас не побеспокоит")
             true_l[x][y]=1
-        elif hp-uron>0:
+        elif hp+attack-uron>0:
             print("Вы смогли сбежать от монстра. Но он может отомстить...")
-            hp=hp-uron
+            hp=hp+attack-uron
         else:
             print("Вы погибли в неравной схватке с монстром... Жаль, но игра окончена")
             break
     elif true_l[x][y]==2:
         print("Здесь сундук!")
         print("1- посмотреть содержимое")
-        print("2 - пойти дальше")
-        d=int(input())
-        if d==2:
-            continue
-        else:
-            
-            if [x, y] in open_cases:
-                case=[ts[int(random.random()*18)] for i in range(1)]
-                case.extend([none, none, none, none])
-            else:
+        print("Любая другая клавиша - пойти дальше")
+        d1=input()
+        if d1=="1":
+            case_is_open=False
+            for i in open_cases:
+                if i[0]==x and i[1]==y:
+                    case=i[2]
+                    case_is_open=True
+            if not case_is_open:
                 case=[ts[int(random.random()*18)] for i in range(5)]
-                open_cases.append([x, y])
+                open_cases.append([x, y, case])
             
             while True:
                 for i in range(5):
                     print(case[i].name)
                 d=int(input("Выберите номер вещи, которую хотите забрать. Нажмите 0 для выхода, -1 чтобы забрать все, -2 - чтобы положить что-то в сундук"))-1
                 if d==-1:
+                    for i in open_cases:
+                        if i[0]==x and i[1]==y:
+                            i[2]=case
                     break
                 elif d==-3:
                     while none in case:
@@ -360,37 +400,14 @@ while True:
                         case=[none for i in range(5)]
                         
                 else:
-                    if len(staff)<size:
+                    if len(staff)<size and case[d]!=none:
                         staff.append(case.pop(d))
                         case.append(none)
-                    else:
+                    elif len(staff)>=size:
                         print("Не хватает места в рюкзаке!")
-                        break
-            
-                        
-                        
-        
-        
-    
-
-        
-    
-            
-                    
-                    
-            
-            
-                
-        
-        
-        
-        
-                
-            
-                
-            
-        
-    
-        
-    
-        
+                        continue
+                    else:
+                        print("Вы не можете забрать пустоту из сундука")
+                        continue
+        else:
+            continue
