@@ -13,7 +13,7 @@ class thing():
         self.knowledge=knowledge
         ts.append(self)
 
-'''Задаем параметры лабиринта'''
+'''Задаем параметры лабиринта. На вход принимаем значения длины и ширины лабиринта'''
 
 l=list()
 vnesh_l=list()
@@ -47,7 +47,7 @@ none=thing('.', 0, 0, 0, 0)
 
 
 
-'''Создаем список для хранения координат открытых сундуков - новых предметов в них появляться не будет'''
+'''Создаем список для хранения координат открытых сундуков - набор предметов в них будет сохраняться'''
 open_cases=list()
 
 '''Генерируем лабиринт размера n*m, заполняем его
@@ -79,11 +79,97 @@ for i in range(m):
 размеры рюкзака'''
 x=0
 y=0
+global kp
+global  hp
+global staff
 hp=100
 kp=10
 size=15
 f=1
 staff=list()
+
+'''Функции для работы с инвентарем.'''
+
+''' На вход ничего не принимаем, откатываем параметры игрока до предыдущего сохраненного состояния'''
+def exit_without_save():
+    staff=copy.deepcopy(copy_staff)
+    hp=hpcopy
+    kp=kpcopy
+    return
+'''Поиск предмета в инвентаре по названию. Принимаем имя искомого объекта'''
+def finder(el):
+    st_names=[i.name for i in staff]
+    el=el.lower()
+    if el in st_names:
+        print(f'{el.capitalize()} в вашем рюкзаке под номером {st_names.index(el)+1}')
+    else:
+        print(f'Вы перерыли весь рюкзак, но так и не нашли {el.lower()}...')
+    return
+
+
+'''Реализация использования инвентаря и создания новых объектов'''
+
+def maker():
+    if (hammer in staff or axe in staff):
+        mat=input("Выберите материал: 1 - железо, 2 - камень (из того, что есть у вас в рюкзаке)")
+        if mat=="2" and stone in staff:
+            r=int(input("что хотите создать? 1 - доспехи, 2 - щит, 3 - молот"))
+            if r==1:
+                staff.remove(stone)
+                staff.append(armor)
+            elif r==2:
+                staff.remove(stone)
+                staff.append(screen)
+            else:
+                staff.remove(stone)
+                staff.append(hammer)
+        elif ferrum in staff and mat=="1":
+            r=int(input("что хотите создать? 1 - доспехи, 2 - меч, 3 - топор"))
+            if r==1:
+                staff.remove(ferrum)
+                staff.append(armor)
+            elif r==2:
+                staff.remove(ferrum)
+                staff.append(sword)
+            else:
+                staff.remove(ferrum)
+                staff.append(axe)
+        else:
+            print("Нет нужного материала!")
+    else:
+        print("нужен топор или молот!")
+    return
+def using(el):
+    if hp+staff[el].health>100:
+        hp=100
+    else:
+        hp+=staff[el].health
+    if kp+staff[el].knowledge>100:
+        kp=100
+    else:
+        kp+=staff[el].knowledge
+    staff.pop(el)
+    return 
+
+def sorting(el):
+    d={
+        1: lambda: staff.sort(key=lambda x: x.name),
+        2: lambda: staff.sort(key=lambda x: -x.harm),
+        3: lambda: staff.sort(key=lambda x: -x.protection),
+        4: lambda: staff.sort(key=lambda x: -x.health),
+        5: lambda: staff.sort(key=lambda x: -x.knowledge),
+        6: lambda: staff.reverse()
+     }
+    action=d.get(el)
+    if action:
+        action()
+    
+    
+
+
+
+
+
 
 
 
@@ -118,65 +204,25 @@ while True:
                 print("7 - выйти без сохранения")
                 d=int(input("Что вы хотите сделать?"))
                 if d==7:
-                    staff=copy.deepcopy(copy_staff)
-                    hp=hpcopy
-                    kp=kpcopy
-                    break
+                    exit_without_save()
                 elif d==6:
                     break
                 elif d==4:
                     el=input("Что хотите найти?")
-                    st_names=[i.name for i in staff]
-                    if el in st_names:
-                        print(f'{el.capitalize()} в вашем рюкзаке под номером {st_names.index(el)+1}')
-                    else:
-                        print(f'Вы перерыли весь рюкзак, но так и не нашли {el.lower()}...')
+                    finder(el)
 
+                
                 elif d==5:
+
                     print("Создавать новые элементы можно только обладая очками знаний (kp) >=50")
                     d=int(input("1- создать элемент, 0 - использовать существующий"))
                     if d==1 and kp>=50:
-                        if (hammer in staff or axe in staff):
-                            mat=input("Выберите материал: 1 - железо, 2 - камень (из того, что есть у вас в рюкзаке)")
-                            if mat=="2" and stone in staff:
-                                r=int(input("что хотите создать? 1 - доспехи, 2 - щит, 3 - молот"))
-                                if r==1:
-                                    staff.remove(stone)
-                                    staff.append(armor)
-                                elif r==2:
-                                    staff.remove(stone)
-                                    staff.append(screen)
-                                else:
-                                    staff.remove(stone)
-                                    staff.append(hammer)
-                            elif ferrum in staff and mat=="1":
-                                r=int(input("что хотите создать? 1 - доспехи, 2 - меч, 3 - топор"))
-                                if r==1:
-                                    staff.remove(ferrum)
-                                    staff.append(armor)
-                                elif r==2:
-                                    staff.remove(ferrum)
-                                    staff.append(sword)
-                                else:
-                                    staff.remove(ferrum)
-                                    staff.append(axe)
-                            else:
-                                print("Нет нужного материала!")
-                        else:
-                            print("нужен топор или молот!")
+                        maker()
                     elif d==1 and kp<50:
                         print("вы пока не можете создавать предметы")
                     else:
                         el=int(input("Введите номер предмета: "))-1
-                        if hp+staff[el].health>100:
-                            hp=100
-                        else:
-                            hp+=staff[el].health
-                        if kp+staff[el].knowledge>100:
-                            kp=100
-                        else:
-                            kp+=staff[el].knowledge
-                        staff.pop(el)
+                        using(el)
                         if hp<0:
                             print("Игра окончена. Не стоило есть всякую гадость...")
                             f=0;
@@ -192,18 +238,11 @@ while True:
                     print("6 - обратный порядок")
                     
                     el=int(input("По чему хотели бы сортировать?"))
-                    if el==1:
-                        staff.sort(key=lambda x: x.name)
-                    elif el==2:
-                        staff.sort(key=lambda x: -x.harm)
-                    elif el==3:
-                        staff.sort(key=lambda x: -x.protection)
-                    elif el==4:
-                        staff.sort(key=lambda x: -x.health)
-                    elif el==5:
-                        staff.sort(key=lambda x: -x.knowledge)
-                    elif el==6:
-                        staff.reverse()
+
+                    sorting(el)
+
+
+                    
                     
                 elif d==2:
                     el=int(input("Номер элемента: "))-1
@@ -289,6 +328,7 @@ while True:
         print("Здесь выход! Воспользуйтесь ключом, чтобы завершить игру")
         print("1-воспользоваться")
         d=input()
+
         if d=='1':
             if key in staff:
                 print("Вы выбрались на свободу! Поздравляем!")
@@ -303,6 +343,7 @@ while True:
         true_l[x][y]=1
         neportal=False
         continue
+
     elif true_l[x][y]==3:
         print("О нет! В этой комнате монстр!!!")
         monstr=int((100)*random.random())

@@ -5,12 +5,12 @@ with open('tested.csv'):
     data=pd.read_csv('tested.csv')
     print(data)
 
+
+'''Часть 2'''
 print('7. первые n строк')
 n=int(input('Количество строк: '))
 print(data.head(n))
 print(" ")
-
-
 
 print('8. последние 5 строк')
 print(data.tail(5))
@@ -42,6 +42,9 @@ print("")
 print("15. Количество уникальных значений Embarked")
 print(data['Embarked'].nunique())
 print('')
+
+
+'''Часть 3'''
 
 print('16. Количество пропусков')
 for i in data.columns:
@@ -104,6 +107,11 @@ print("26. Количество строк и столбцов после обр
 print(len(data.columns), len(data))
 
 
+
+
+
+'''Часть 4'''
+
 print("31-32. Выжившие")
 surv=data["Survived"].to_numpy()
 print(f'Процент выживших - {round(np.mean(surv)*100, 2)} %')
@@ -137,6 +145,10 @@ print("Средняя", np.nanmean(fare))
 print ("36. Возраст")
 print("Стандартное отклонение", np.nanstd(age))
 
+
+
+
+'''Часть 5'''
 print("Фильтрация данных")
 print("#1")
 filtered_data=data[(data["Sex"]=="male") & (data["Age"]>30) & (data["Pclass"]==1)]
@@ -160,6 +172,10 @@ filtered_data=data[(data["Embarked"]=="S") & (data["Age"]>=20) & (data["Age"]<=4
 print(len(filtered_data))
 print(filtered_data)
 
+
+
+
+'''Часть 6'''
 print("Группировка и агрегирование")
 
 print("#37")
@@ -185,7 +201,10 @@ newdata=data.groupby(['Pclass'])["Survived"].mean()*100
 print(newdata)
 print("Наибольшая доля выживших в 1 классе")
 
-'''Сохранение результатов в csv'''
+
+
+'''Сохранение результатов в csv. Часть 7'''
+
 data.to_csv('titanic_processed.csv')
 
 newdata1.to_csv('titanic_statistics.csv')
