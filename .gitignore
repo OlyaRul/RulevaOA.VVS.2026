@@ -229,3 +229,4 @@ __marimo__/
 
 # Сборка расширений VS Code
 *.vsix
+*.slnx
