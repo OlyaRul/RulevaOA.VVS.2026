@@ -5,12 +5,13 @@ ts=[]
 '''Создаем класс предметов - каждый обладает именем, уровнем урона, защиты, питательности и знаний'''
 
 class thing():
-    def __init__(self, name, harm, protection, health, knowledge):
+    def __init__(self, name, harm, protection, health, knowledge, cat):
         self.harm=harm
         self.protection=protection
         self.name=name
         self.health=health
         self.knowledge=knowledge
+        self.cat=cat
         ts.append(self)
 
 '''Задаем параметры лабиринта. На вход принимаем значения длины и ширины лабиринта'''
@@ -26,24 +27,31 @@ vnesh_l[0][0]='O'
 
 '''Генерируем предметы'''
 
-key=thing('ключ', 1, 0, 0, 0)
-potion1=thing('простое зелье', 0, 0, 25, 25)
-potion2=thing('супер-зелье', 0, 0, 100, 100)
-potion3=thing('опасное зелье', 0, 0, -30, -10)
-mushroom=thing('гриб', 0, 0, -50, -5)
-pie=thing('яблоко', 1, 0, 5, 0)
-sweet=thing('бутерброд', 0, 0, 10, 0)
-meat=thing('кусок мяса', 1, 1, 15, 0)
-axe=thing('топор', 30, 0, -10, 0)
-hammer=thing('молот', 30, 0, -10, 0)
-sword=thing('меч', 50, 10, -10, 0)
-gun=thing('гранатомет', 65, 10, -5, 0)
-screen=thing('щит', 5, 30, -3, 0)
-armor=thing('доспехи', 0, 75, 0, 0)
-book=thing('книга', 0, 5, 0, 55)
-stone=thing('камень', 5, 0, -5, 0)
-ferrum=thing('кусок железа', 7, 0, -3, 0)
-none=thing('.', 0, 0, 0, 0)
+key=thing('ключ', 1, 0, 0, 0, "key")
+potion1=thing('простое зелье', 0, 0, 25, 25, "potion")
+potion2=thing('супер-зелье', 0, 0, 100, 100, "potion")
+potion3=thing('опасное зелье', 0, 0, -30, -10, "potion")
+mushroom=thing('гриб', 0, 0, -50, -5, "food")
+pie=thing('яблоко', 1, 0, 5, 0, "food")
+sweet=thing('бутерброд', 0, 0, 10, 0, "food")
+meat=thing('кусок мяса', 1, 1, 15, 0, "food")
+axe=thing('топор', 30, 0, -10, 0, "tool")
+hammer=thing('молот', 30, 0, -10, 0, "tool")
+sword=thing('меч', 50, 10, -10, 0, "weapon")
+gun=thing('гранатомет', 65, 10, -5, 0, "weapon")
+screen=thing('щит', 5, 30, -3, 0, "protection")
+armor=thing('доспехи', 0, 75, 0, 0, "protection")
+book=thing('книга', 0, 5, 0, 55, "book")
+stone=thing('камень', 5, 0, -5, 0, "mat")
+ferrum=thing('кусок железа', 7, 0, -3, 0, "mat")
+none=thing('.', 0, 0, 0, 0, "none")
+
+Saxe=thing('Супер - топор', 60, 0, -10, 0, "tool")
+Shammer=thing('Супер - молот', 60, 0, -10, 0, "tool")
+Ssword=thing('Супер - меч', 100, 20, -20, 0, "weapon")
+Sgun=thing('Супер - гранатомет', 100, 50, -5, 0, "weapon")
+Sscreen=thing('Супер - щит', 15, 60, -3, 0, "protection")
+Sarmor=thing('Супер - доспехи', 10, 100, 0, 0, "protection")
 
 
 
@@ -79,9 +87,8 @@ for i in range(m):
 размеры рюкзака'''
 x=0
 y=0
-global kp
-global  hp
-global staff
+
+
 hp=100
 kp=10
 size=15
@@ -90,7 +97,7 @@ staff=list()
 
 '''Функции для работы с инвентарем.'''
 
-''' На вход ничего не принимаем, откатываем параметры игрока до предыдущего сохраненного состояния'''
+''' На вход ничего не принимаем, откатываем параметры инвентаря до предыдущего сохраненного состояния'''
 def exit_without_save():
     staff=copy.deepcopy(copy_staff)
     hp=hpcopy
@@ -111,35 +118,29 @@ def finder(el):
 
 def maker():
     if (hammer in staff or axe in staff):
-        mat=input("Выберите материал: 1 - железо, 2 - камень (из того, что есть у вас в рюкзаке)")
-        if mat=="2" and stone in staff:
+        mat=int(input("Выберите номер материала из того, что есть у вас в рюкзаке"))-1
+        if  staff[mat].cat=="mat":
             r=int(input("что хотите создать? 1 - доспехи, 2 - щит, 3 - молот"))
             if r==1:
-                staff.remove(stone)
+                staff.pop(mat)
                 staff.append(armor)
             elif r==2:
-                staff.remove(stone)
+                staff.remove(mat)
                 staff.append(screen)
             else:
-                staff.remove(stone)
+                staff.remove(mat)
                 staff.append(hammer)
-        elif ferrum in staff and mat=="1":
-            r=int(input("что хотите создать? 1 - доспехи, 2 - меч, 3 - топор"))
-            if r==1:
-                staff.remove(ferrum)
-                staff.append(armor)
-            elif r==2:
-                staff.remove(ferrum)
-                staff.append(sword)
-            else:
-                staff.remove(ferrum)
-                staff.append(axe)
         else:
             print("Нет нужного материала!")
     else:
         print("нужен топор или молот!")
     return
+
+
+'''Используем элемент инвентаря. На вход принимаем номер элемента. Реализуем использование элемента'''
 def using(el):
+    global hp
+    global kp
     if hp+staff[el].health>100:
         hp=100
     else:
@@ -164,10 +165,34 @@ def sorting(el):
     if action:
         action()
     
-    
+def upgrade(el):  
+    if staff[el].cat=='weapon' or staff[el].cat=='protection' or staff[el].cat=="tool" and book in staff:
+        d={
+            axe: Saxe,
+            hammer: Shammer,
+            sword: Ssword,
+            gun: Sgun,
+            screen: Sscreen,
+            armor: Sarmor
+        }
+        staff[el]=d.get(staff[el])
+    else:
+        print("Усилить можно только оружие или защиту, также нужно иметь книгу, чтобы знать, как это делается!")
 
-
-
+def put():
+    while none in case:
+        for i in range(len(staff)):
+            print(staff[i].name)
+        k=int(input("Выберите элемент, который хотите положить в сундук. Если закончили - нажмите 0"))-1
+        if k==-1:
+            return
+        else:
+            case.append(staff.pop(k))
+            case.remove(none)
+            continue
+    if not none in case:
+        print("Нет места!")
+        return 
 
 
 
@@ -202,6 +227,7 @@ while True:
                 print("5 - создать новый элемент, использовать существующий")
                 print("6 - сохранить и выйти")
                 print("7 - выйти без сохранения")
+                print("8 - Улучшить элемент")
                 d=int(input("Что вы хотите сделать?"))
                 if d==7:
                     exit_without_save()
@@ -211,6 +237,9 @@ while True:
                     el=input("Что хотите найти?")
                     finder(el)
 
+                elif d==8:
+                    el=int(input("Номер элемента, который хотите улучшить: "))-1
+                    upgrade(el);
                 
                 elif d==5:
 
@@ -373,7 +402,7 @@ while True:
                         print("Этот предмет уже был выбран!")
             
 
-        '''Расчет урона от монстра и силу атаки на него'''
+        '''Расчет урона от монстра и силы атаки на него'''
         if t1==-1 and t2==-1:
             uron=monstr
             attack=0
@@ -423,16 +452,7 @@ while True:
                             i[2]=case
                     break
                 elif d==-3:
-                    while none in case:
-                        for i in range(len(staff)):
-                            print(staff[i].name)
-                        k=int(input("Выберите элемент, который хотите положить в сундук. Если закончили - нажмите 0"))-1
-                        if k==-1:
-                            break
-                        else:
-                            case.append(staff.pop(k))
-                            case.remove(none)
-                            continue
+                    put();
                         
                 elif d==-2:
                     case=[i for i in case if i!=none]
