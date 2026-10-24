@@ -46,12 +46,12 @@ stone=thing('камень', 5, 0, -5, 0, "mat")
 ferrum=thing('кусок железа', 7, 0, -3, 0, "mat")
 none=thing('.', 0, 0, 0, 0, "none")
 
-Saxe=thing('Супер - топор', 60, 0, -10, 0, "tool")
-Shammer=thing('Супер - молот', 60, 0, -10, 0, "tool")
-Ssword=thing('Супер - меч', 100, 20, -20, 0, "weapon")
-Sgun=thing('Супер - гранатомет', 100, 50, -5, 0, "weapon")
-Sscreen=thing('Супер - щит', 15, 60, -3, 0, "protection")
-Sarmor=thing('Супер - доспехи', 10, 100, 0, 0, "protection")
+Saxe=thing('Супер - топор', 60, 0, -10, 0, "super")
+Shammer=thing('Супер - молот', 60, 0, -10, 0, "super")
+Ssword=thing('Супер - меч', 100, 20, -20, 0, "super")
+Sgun=thing('Супер - гранатомет', 100, 50, -5, 0, "super")
+Sscreen=thing('Супер - щит', 15, 60, -3, 0, "super")
+Sarmor=thing('Супер - доспехи', 10, 100, 0, 0, "super")
 
 
 
@@ -62,7 +62,7 @@ open_cases=list()
 случайными числами - типами комнат'''
 
 
-for i in range(int(m*n/5)):
+for i in range(int(m*n/2)):
     true_l[int((m)*random.random())][int((n)*random.random())]=5;
     true_l[int((m)*random.random())][int((n)*random.random())]=3;
     true_l[int((m)*random.random())][int((n)*random.random())]=2;
@@ -87,7 +87,6 @@ for i in range(m):
 размеры рюкзака'''
 x=0
 y=0
-
 
 hp=100
 kp=10
@@ -152,6 +151,7 @@ def using(el):
     staff.pop(el)
     return 
 
+'''Сортировка инвентаря. Принимаем на вход номер сортировки, проводим сортировку'''
 def sorting(el):
     d={
         1: lambda: staff.sort(key=lambda x: x.name),
@@ -164,9 +164,11 @@ def sorting(el):
     action=d.get(el)
     if action:
         action()
-    
+
+
+'''Улучшаем предмет. Принимаем номер предмета в инвентаре, если выбранный элемент можно улучшить - заменяем его на улучшенный'''    
 def upgrade(el):  
-    if staff[el].cat=='weapon' or staff[el].cat=='protection' or staff[el].cat=="tool" and book in staff:
+    if staff[el].cat=='weapon' or staff[el].cat=='protection' or staff[el].cat=="tool" and (book in staff or kp>50):
         d={
             axe: Saxe,
             hammer: Shammer,
@@ -179,10 +181,12 @@ def upgrade(el):
     else:
         print("Усилить можно только оружие или защиту, также нужно иметь книгу, чтобы знать, как это делается!")
 
+
+'''Реализация сбрасывания объектов из инвентаря в сундук. Принимаем номер элемента, модифицируем инвентарь и сундук'''
 def put():
     while none in case:
         for i in range(len(staff)):
-            print(staff[i].name)
+            print(i+1, ". ", staff[i].name)
         k=int(input("Выберите элемент, который хотите положить в сундук. Если закончили - нажмите 0"))-1
         if k==-1:
             return
@@ -201,11 +205,12 @@ def put():
 '''Запускаем игру'''
 neportal=True
 while True:
+
     '''Проверяем, был ли предыдущий шаг из портала'''
-    
     if neportal:
         step=input("Воспользуйтесь клавишами a, w, d, s чтобы сделать ход, z - чтобы посмотреть инвентарь: ")
-        if step=='z':
+        if step=='z': 
+            '''Переводим игрока в режим управления инвентарем. Считываем желаемую операцию, выпооняем ее'''
             copy_staff=copy.deepcopy(staff)
             hpcopy=hp
             kpcopy=kp
@@ -242,7 +247,7 @@ while True:
                     upgrade(el);
                 
                 elif d==5:
-
+                    '''создаем/используем предметы, проверяя необходимые условия. Если hp < 0 - завершаем игру'''
                     print("Создавать новые элементы можно только обладая очками знаний (kp) >=50")
                     d=int(input("1- создать элемент, 0 - использовать существующий"))
                     if d==1 and kp>=50:
@@ -270,13 +275,13 @@ while True:
 
                     sorting(el)
 
-
-                    
-                    
                 elif d==2:
+
+                    '''Вывод информации о выбранном предмете'''
                     el=int(input("Номер элемента: "))-1
                     print("Имя: ", staff[el].name," урон: ", staff[el].harm, " защита: ", staff[el].protection, " питательность: ", staff[el].health, " знания: ", staff[el].knowledge)
                 elif d==1:
+                    '''Удаление элемента из инвентаря'''
                     el=int(input("Номер элемента: "))-1
                     staff.pop(el)
                     print("Удалено")        
@@ -289,8 +294,10 @@ while True:
         выход за границы лабиринта, выводим предупрежение'''        
         if step=="a":
             if y==0:
+                '''Если ход предполагает выход за границу - выводим предупреждение'''
                 print("Недопустимый ход")
                 continue
+            '''Переводим игрока в новую клетку, старую отмечаем как открытую - точкой'''
             vnesh_l[x][y]="."
             y=y-1
             vnesh_l[x][y]="O"
@@ -315,9 +322,10 @@ while True:
             vnesh_l[x][y]="."
             y=y+1
             vnesh_l[x][y]="O"
-        '''Обрабатываем ситуацию, когда предыдущий ход был в портал'''
+    
     else:
-        neportal=True;
+        '''Обрабатываем ситуацию, когда предыдущий ход был в портал'''
+        neportal=True
         vnesh_l[x][y]="."
         x=int((m)*random.random())
         y=int((n)*random.random())
@@ -333,13 +341,14 @@ while True:
     print("hp", hp, "kp", kp)
     
  
-
+    '''Говорим игроку, что клетка пуста'''
     if true_l[x][y]==1:
         print("Тут пусто...")
         continue
 
-
+    
     elif true_l[x][y]==4:
+        '''Взаимодействие с клеткой с ключом. Можно взять только один ключ с собой. Если ключ есть - забрать новый нельзя'''
         print("Неужели, Вы нашли Ключ!")
         d=input("Нажмите 1 - чтобы забрать")
         if d=='1':
@@ -359,6 +368,7 @@ while True:
         d=input()
 
         if d=='1':
+            '''Проверка наличия ключа - люязательного условия для завершения игры'''
             if key in staff:
                 print("Вы выбрались на свободу! Поздравляем!")
                 break
@@ -368,14 +378,17 @@ while True:
 
     
     elif true_l[x][y]==5:
+        '''Клетка-портал. Переводим игрока в рандомную клетку'''
         print("Вы попали в портал! Где вы окажетесь дальше, не может предсказать даже создатель игры...")
         true_l[x][y]=1
         neportal=False
         continue
 
     elif true_l[x][y]==3:
+        '''Клетка с монстром'''
         print("О нет! В этой комнате монстр!!!")
         monstr=int((100)*random.random())
+        '''monstr - сила монстра. Максимальный урон, который он может нанести'''
         print("Выберите, чем будете защищаться!")
         d=input("1 - выбрать оружие и защиту, любая другая клавиша - сразиться с монстром в кулачном бою")
 
@@ -405,24 +418,27 @@ while True:
         '''Расчет урона от монстра и силы атаки на него'''
         if t1==-1 and t2==-1:
             uron=monstr
+            '''Урон - тот вред, который монстр наносит игроку (hp, которые теряет игрок)'''
             attack=0
+            '''attack - урон, который мы наносим монстру. Если он больше силы монстра, то клетка становится пустой'''
         elif t1>-1 and t2==-1:
-            attack=staff[t1].harm
+            '''В зависимости от полученных значений завершаем игру, или продолжаем'''
+            attack=staff[t1].harm 
             uron=monstr-staff[t1].protection
         else:
             attack=staff[t1].harm + staff[t2].harm
             uron=monstr-staff[t1].protection-staff[t2].protection
 
         if uron<=0:
-            print("Вы победили монстра!")
-            true_l[x][y]=1
+            print("Вы победили монстра! В его логове оказался сундук... ")
+            true_l[x][y]=2
             continue
-           
+            '''После схватки с монстром можем или получить сундук, или оставить клетку пустой, или заврешить игру, или оставить клетку с монстром'''
         elif uron <= attack:
             print("Вы смогли защититься от монстра. Он испугался и больше вас не побеспокоит")
             true_l[x][y]=1
         elif hp+attack-uron>0:
-            print("Вы смогли сбежать от монстра. Но он может отомстить...")
+            print("Вы сбежали от монстра. Но он может отомстить...")
             hp=hp+attack-uron
         else:
             print("Вы погибли в неравной схватке с монстром... Жаль, но игра окончена")
@@ -432,21 +448,25 @@ while True:
         print("1- посмотреть содержимое")
         print("Любая другая клавиша - пойти дальше")
         d1=input()
+        '''реализация работы с сундуком. Выполняем действие в соответствии с введенным значением d1'''
         if d1=="1":
             case_is_open=False
+            '''Проверяем, был ли сундук открыт. Если нет - генерируем предметы. Иначе - открываем последнее состояние сундука'''
             for i in open_cases:
                 if i[0]==x and i[1]==y:
                     case=i[2]
                     case_is_open=True
+                    break
             if not case_is_open:
                 case=[ts[int(random.random()*18)] for i in range(5)]
                 open_cases.append([x, y, case])
             
             while True:
                 for i in range(5):
-                    print(case[i].name)
+                    print(i+1, ". ", case[i].name)
                 d=int(input("Выберите номер вещи, которую хотите забрать. Нажмите 0 для выхода, -1 чтобы забрать все, -2 - чтобы положить что-то в сундук"))-1
                 if d==-1:
+                    '''Закрываем сундук, сохраняем его состояние'''
                     for i in open_cases:
                         if i[0]==x and i[1]==y:
                             i[2]=case
@@ -455,12 +475,14 @@ while True:
                     put();
                         
                 elif d==-2:
+                    '''Кладем все содержимое в инвентарь, проверяя, хватает ли места'''
                     case=[i for i in case if i!=none]
                     if len(staff)+len(case)<=size:
                         staff.extend(case)
                         case=[none for i in range(5)]
                         
                 else:
+                    '''Забираем вещь себе из сундука, проверяя допустимость этого действия'''
                     if len(staff)<size and case[d]!=none:
                         staff.append(case.pop(d))
                         case.append(none)
