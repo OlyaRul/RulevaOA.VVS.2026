@@ -44,7 +44,7 @@ armor=thing('доспехи', 0, 75, 0, 0, "protection")
 book=thing('книга', 0, 5, 0, 55, "book")
 stone=thing('камень', 5, 0, -5, 0, "mat")
 ferrum=thing('кусок железа', 7, 0, -3, 0, "mat")
-none=thing('.', 0, 0, 0, 0, "none")
+none=thing('.', -1, 0, 0, 0, "none")
 
 Saxe=thing('Супер - топор', 60, 0, -10, 0, "super")
 Shammer=thing('Супер - молот', 60, 0, -10, 0, "super")
@@ -98,6 +98,9 @@ staff=list()
 
 ''' На вход ничего не принимаем, откатываем параметры инвентаря до предыдущего сохраненного состояния'''
 def exit_without_save():
+    global staff
+    global hp
+    global kp
     staff=copy.deepcopy(copy_staff)
     hp=hpcopy
     kp=kpcopy
@@ -116,18 +119,19 @@ def finder(el):
 '''Реализация использования инвентаря и создания новых объектов'''
 
 def maker():
+    global staff
     if (hammer in staff or axe in staff):
         mat=int(input("Выберите номер материала из того, что есть у вас в рюкзаке"))-1
         if  staff[mat].cat=="mat":
             r=int(input("что хотите создать? 1 - доспехи, 2 - щит, 3 - молот"))
             if r==1:
-                staff.pop(mat)
+                staff.remove(staff[mat])
                 staff.append(armor)
             elif r==2:
-                staff.remove(mat)
+                staff.remove(staff[mat])
                 staff.append(screen)
             else:
-                staff.remove(mat)
+                staff.remove(staff[mat])
                 staff.append(hammer)
         else:
             print("Нет нужного материала!")
@@ -140,6 +144,7 @@ def maker():
 def using(el):
     global hp
     global kp
+    global staff
     if hp+staff[el].health>100:
         hp=100
     else:
@@ -153,6 +158,7 @@ def using(el):
 
 '''Сортировка инвентаря. Принимаем на вход номер сортировки, проводим сортировку'''
 def sorting(el):
+    global staff
     d={
         1: lambda: staff.sort(key=lambda x: x.name),
         2: lambda: staff.sort(key=lambda x: -x.harm),
@@ -168,7 +174,10 @@ def sorting(el):
 
 '''Улучшаем предмет. Принимаем номер предмета в инвентаре, если выбранный элемент можно улучшить - заменяем его на улучшенный'''    
 def upgrade(el):  
-    if staff[el].cat=='weapon' or staff[el].cat=='protection' or staff[el].cat=="tool" and (book in staff or kp>50):
+    global staff
+    global hp
+    global kp
+    if (staff[el].cat=='weapon' or staff[el].cat=='protection' or staff[el].cat=="tool") and (book in staff or kp>50):
         d={
             axe: Saxe,
             hammer: Shammer,
@@ -183,7 +192,8 @@ def upgrade(el):
 
 
 '''Реализация сбрасывания объектов из инвентаря в сундук. Принимаем номер элемента, модифицируем инвентарь и сундук'''
-def put():
+def put(case):
+
     while none in case:
         for i in range(len(staff)):
             print(i+1, ". ", staff[i].name)
@@ -194,6 +204,7 @@ def put():
             case.append(staff.pop(k))
             case.remove(none)
             continue
+
     if not none in case:
         print("Нет места!")
         return 
@@ -236,6 +247,7 @@ while True:
                 d=int(input("Что вы хотите сделать?"))
                 if d==7:
                     exit_without_save()
+                    break
                 elif d==6:
                     break
                 elif d==4:
@@ -397,9 +409,11 @@ while True:
         t2=-1
         '''Выбираем предметы из инвентаря для усиления'''
         if d=="1":
-            print("Предмет   Урон   Защита")
+            print("Предмет      Урон      Защита")
+            s=0
             for i in staff:
-                print(i.name, i.harm, i.protection)
+                s+=1
+                print(s, ". ", i.name, i.harm, i.protection)
             t1=int(input("Введите номер предмета "))-1
             if t1>len(staff)-1:
                 t1=-1
@@ -472,7 +486,7 @@ while True:
                             i[2]=case
                     break
                 elif d==-3:
-                    put();
+                    put(case)
                         
                 elif d==-2:
                     '''Кладем все содержимое в инвентарь, проверяя, хватает ли места'''
@@ -480,6 +494,8 @@ while True:
                     if len(staff)+len(case)<=size:
                         staff.extend(case)
                         case=[none for i in range(5)]
+                    else:
+                        print("Не хватает места в рюкзаке!")
                         
                 else:
                     '''Забираем вещь себе из сундука, проверяя допустимость этого действия'''
