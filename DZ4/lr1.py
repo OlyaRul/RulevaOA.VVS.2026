@@ -83,9 +83,8 @@ print("")
 
 
 print("23. Embarked")
-for i in range(len(data["Embarked"])):
-    if data.iat[i, 11]=="NaN":
-        data=data.drop[i]
+data.dropna(subset=['Embarked'], inplace=True)
+data.reset_index(drop=True, inplace=True)
 
 
 print("24. Cabin")
