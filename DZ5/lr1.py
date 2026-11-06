@@ -51,7 +51,7 @@ def donut():
     btn1.pack(side="left", expand=True)
     btn2.pack(side="right", expand=True)
 
-'''Проверка корректности поля ввода - проверяем что ввод не меньше 5 символов'''
+'''Проверка корректности поля ввода'''
 def err_checking():
     win=tk.Toplevel(root, background="#FFA591")
     win.title("Предупреждение!")
