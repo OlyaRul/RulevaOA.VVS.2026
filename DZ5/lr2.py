@@ -170,6 +170,8 @@ class WarningWindow(QWidget):
         layout.addWidget(btn)
         self.setLayout(layout)
 
+
+'''Окно для контроля корректности ввода'''
 class LittleWin(QWidget):
     def __init__(self):
         super().__init__()
@@ -186,7 +188,10 @@ class LittleWin(QWidget):
         self.setLayout(layout)
 
 
+
 app = QApplication(sys.argv)
+
+'''Устанавливаем стиль для окна'''
 theme_style = qdarktheme.load_stylesheet("dark")
 app.setStyleSheet(theme_style)
 window = MainWindow()
