@@ -187,6 +187,78 @@ class LittleWin(QWidget):
         layout.addWidget(btn)
         self.setLayout(layout)
 
+class Login(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Авторизация")
+        self.resize(350, 150)
+        layout = QVBoxLayout()
+        label = QLabel("Уже есть аккаунт?")
+        lay1=QHBoxLayout()
+        btn_entry=QPushButton("Да")
+        btn_reg=QPushButton("Нет")
+        lay1.addWidget(btn_entry)
+        lay1.addWidget(btn_reg)
+        btn_entry.clicked.connect(self.entry)
+        btn_reg.clicked.connect(self.reg)
+        layout.addWidget(label)
+        layout.addLayout(lay1)
+        self.setLayout(layout)
+    def entry(self):
+        self.win = EntryWindow()
+        self.win.show()
+        self.close()
+
+    def reg(self):
+        self.win = RegWindow()
+        self.win.show()
+        self.close()
+
+
+class RegWindow(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Регистрация")
+        self.resize(350, 150)
+        layout = QVBoxLayout()
+        self.login=QLineEdit()
+        self.password=QLineEdit()
+                
+        btn_entry=QPushButton("Зарегистрироваться")
+        btn_entry.clicked.connect(self.entry)
+        log_layout=QFormLayout()
+        log_layout.addRow("Логин", self.login)
+        log_layout.addRow("Пароль", self.password)
+        layout.addLayout(log_layout)
+        layout.addWidget(btn_entry)
+        self.setLayout(layout)
+    def entry(self):
+        self.win = EntryWindow()
+        self.win.show()
+        self.close()
+        
+
+class EntryWindow(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Вход")
+        self.resize(350, 150)
+        layout = QVBoxLayout()
+        self.login=QLineEdit()
+        self.password=QLineEdit()
+        
+        btn_entry=QPushButton("Войти")
+        btn_entry.clicked.connect(self.entry)
+        log_layout=QFormLayout()
+        log_layout.addRow("Логин", self.login)
+        log_layout.addRow("Пароль", self.password)
+        layout.addLayout(log_layout)
+        layout.addWidget(btn_entry)
+        self.setLayout(layout)
+    def entry(self):
+        self.win = MainWindow()
+        self.win.show()
+        self.close()
 
 
 app = QApplication(sys.argv)
@@ -194,6 +266,7 @@ app = QApplication(sys.argv)
 '''Устанавливаем стиль для окна'''
 theme_style = qdarktheme.load_stylesheet("dark")
 app.setStyleSheet(theme_style)
-window = MainWindow()
-window.show() 
-sys.exit(app.exec()) 
+login = Login()
+login.show()
+sys.exit(app.exec())
+
