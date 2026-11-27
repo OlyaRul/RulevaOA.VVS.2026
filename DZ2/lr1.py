@@ -40,8 +40,7 @@ while True:
             elif m==2:
                 w1=input("Введите заменяемое слово: ")
                 w2=input("Введите новое слово: ")
-                while w1 in s:
-                    s=s.replace(w1, w2)
+                s=s.replace(w1, w2)
                 print(f'Результатом замены {w1} на {w2} в строке {scopy} является {s}') 
             elif m==3:
                 lit=input("Введите символ: ")
@@ -89,7 +88,7 @@ while True:
             
             if m==1:
                 s=input("Введите строку: ")
-                if (s.isdigit() and not (len(s)>1 and s[0]==0)) or (len(s)>1 and s[1:].isdigit() and s[0]=="-" and s[1]!="0"):
+                if (s.isdigit() and not (len(s)>1 and s[0]=="0")) or (len(s)>1 and s[1:].isdigit() and s[0]=="-" and s[1]!="0"):
                     print("Cтрока является целым числом")
                 elif s.isalpha():
                     print("Строка является словом")
